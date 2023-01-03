@@ -7,7 +7,9 @@
 
 import UIKit
 
-class PosterImageView: UIImageView {
+final class PosterImageView: UIImageView {
+    
+    private var dataTask: URLSessionDataTask?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -22,14 +24,21 @@ class PosterImageView: UIImageView {
     func downloadImage(movie: MovieResult) {
         guard let url = URL(string: APIURLs.imageURL(posterPath: movie._posterPath)) else { return }
         
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data else { return }
+       dataTask = NetworkManager.shared.download(url: url) { [weak self] result in
+            guard let self = self else { return }
             
-            DispatchQueue.main.async {
-                self.image = UIImage(data: data)
-            }
-            
-        }.resume()
+           switch result {
+           case .success(let data):
+               DispatchQueue.main.async {self.image = UIImage(data: data)}
+           case .failure(_):
+               break
+           }
+        }
+    }
+    
+    func cancelDownloading() {
+        dataTask?.cancel()
+        dataTask = nil
     }
     
 }

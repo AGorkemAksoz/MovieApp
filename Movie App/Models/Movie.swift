@@ -15,10 +15,15 @@ struct Movie: Decodable {
 struct MovieResult: Decodable {
     let id: Int?
     let posterPath: String?
+    let overview, releaseDate, title: String?
+
     
     enum CodingKeys: String, CodingKey {
         case id
         case posterPath = "poster_path"
+        case overview
+        case releaseDate = "release_date"
+        case title
     }
     
     var _id: Int {
@@ -27,5 +32,17 @@ struct MovieResult: Decodable {
     
     var _posterPath: String {
         posterPath ?? ""
+    }
+    
+    var _title: String {
+        title ?? "N/A"
+    }
+    
+    var _releaseDate: String {
+        releaseDate ?? "N/A"
+    }
+    
+    var _overview: String {
+        overview ?? "There is no overview!"
     }
 }

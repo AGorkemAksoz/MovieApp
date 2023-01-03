@@ -7,7 +7,7 @@
 
 import UIKit
 
-class MovieCell: UICollectionViewCell {
+final class MovieCell: UICollectionViewCell {
     static let reuseID = "MovieCell"
     
     private var posterImageView: PosterImageView!
@@ -22,6 +22,13 @@ class MovieCell: UICollectionViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        posterImageView.image = nil
+        posterImageView.cancelDownloading()
     }
     
     func setCell(movie: MovieResult) {

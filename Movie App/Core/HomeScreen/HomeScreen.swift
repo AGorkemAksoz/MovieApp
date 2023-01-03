@@ -10,6 +10,8 @@ import UIKit
 protocol HomeScreenInterface: AnyObject {
     func configureVC()
     func configureCollectionView()
+    func reloadCollectionView()
+    func navigateToDetailScreen(movie: MovieResult)
 }
 
 final class HomeScreen: UIViewController {
@@ -17,7 +19,7 @@ final class HomeScreen: UIViewController {
     private let viewModel = HomeViewModel()
     
     private var collectionView: UICollectionView!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,6 +29,11 @@ final class HomeScreen: UIViewController {
 }
 
 extension HomeScreen: HomeScreenInterface {
+    
+    func reloadCollectionView() {
+        collectionView.reloadOnMainThread()
+    }
+    
     func configureCollectionView() {
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: UIHelper.createHomeFlowLayout())
         view.addSubview(collectionView)
@@ -38,11 +45,18 @@ extension HomeScreen: HomeScreenInterface {
         
         collectionView.pinToEdgesOf(view: view)
         
-        
     }
     
     func configureVC() {
         view.backgroundColor = .systemMint
+        title = "Popular Movies 🔥"
+    }
+    
+    func navigateToDetailScreen(movie: MovieResult) {
+        DispatchQueue.main.async {
+            let detailScreen = DetailScreen(movie: movie)
+            self.navigationController?.pushViewController(detailScreen, animated: true)
+        }
     }
 }
 
@@ -58,5 +72,20 @@ extension HomeScreen: UICollectionViewDelegate, UICollectionViewDataSource {
         return cell
     }
     
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        viewModel.getDetail(id: viewModel.movies[indexPath.item]._id)
+    }
+    
+    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let height = scrollView.frame.size.height
+        
+        guard contentHeight != 0 else { return }
+        
+        if offsetY >= contentHeight - (2 * height) {
+            viewModel.getMovies()
+        }
+    }
     
 }
